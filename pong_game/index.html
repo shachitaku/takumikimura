@@ -451,7 +451,7 @@ function colorCircle(centerX, centerY, radius, drawColor) {
 //音楽系は全部ここに
 function playBGM(song) {
   bgm = new Audio();
-  bgm.src = song;
+  bgm.src = "./mp3/"+song;
   bgm.play();
 }
 
@@ -466,7 +466,7 @@ function stopBGM(song){
 
 function playSound(sound) {
   let audioElem = new Audio();
-  audioElem.src = sound;
+  audioElem.src = "./mp3/"+sound;
   audioElem.play();
 }
 
