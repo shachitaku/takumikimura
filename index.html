@@ -1,65 +1,543 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<h1 style="text-align: left;">Press space to pause.</h1>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/6.2.4/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/6.2.4/firebase-auth.js"></script>
-    <script defer src="/__/firebase/6.2.4/firebase-database.js"></script>
-    <script defer src="/__/firebase/6.2.4/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/6.2.4/firebase-storage.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+<!-- 
+hi <b> This text is thick </b> and <i> this text is slanted </i> and this text is normal
+from here below, it's javascript! no more html.
+-->
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-        try {
-          let app = firebase.app();
-          let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
-          document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
-  </body>
+<!-- creating canvas to use js to display graphics  -->
+<canvas id = "gameCanvas" width = "800" height = "600"></canvas>
+
+<script>
+//make ball faster, slower only when pressing S.
+
+let canvas; 				//information on dimensions of display area
+let canvasContext;  		//graphical info. (cricles, rectangles)
+
+let ballX = 50;				//x-coordinate of ball
+let ballY = 50;				//y-coordinate of ball
+let ballSpeedX = 10;		//speed of ball in x direction
+let ballSpeedY = 10;		//speed of ball in y direction
+
+let playerPaddleY = 250; 	//y-coordinate of player paddle
+let computerPaddleY = 250; 	//y-coordinate of computer paddle
+let PADDLE_HEIGHT = 100; 	//height of the paddles
+const PADDLE_WIDTH = 10; 	//width of the paddles
+let computerPaddleHeight = 100;
+
+let itemX = 400;			//for items
+let itemY = 300;
+let itemSpeedX = -3;
+let itemSpeedY = -3;
+let itemTime = 5;
+let itemExists = false;
+let gotItem = true;
+
+let playerScore = 0;		//initial score
+let computerScore = 0;		//initial score
+const WINNING_SCORE = 3;	//score needed to win
+let showWinScreen = false;	//for detection of win
+
+let first = true;			//just for first time executions
+let gameStarted = false;	//to enable game pause in the beginning
+let pause = false;			//ポーズ判定
+
+var start;					//時間計測用
+var hour = 0;
+var min = 0;
+var sec = 0;
+var now = 0;
+var datet = 0;		
+let playDuration = 0;		//ゲームプレイしていた時間
+let pauseDuration = 0;		//ポーズしていた時間
+
+let framesPerSecond = 50;	//ゲームの速さ1000/framesPerSecond で決まる
+
+var bgm;					//音楽用
+
+
+//一度のみ呼ぶ関数
+var executeOnce = function(f){
+    var called = false, result = undefined;
+    return function(){
+        if(!called){
+            result = f.apply(this, arguments);
+            called = true;
+        }   
+        return result;
+    };  
+};
+
+function disp(){
+	//終わったときの経過時間（プレイ時間 - ポーズしてた時間）
+	if(showWinScreen){
+		let gameDuration = playDuration; //- pauseDuration ?? no need rn 
+		hour = parseInt(gameDuration /framesPerSecond / 3600);
+		min = parseInt((gameDuration /framesPerSecond / 60) % 60);
+		sec = Math.round(gameDuration/framesPerSecond % 60);
+		if(hour < 10) { hour = "0" + hour; }
+		if(min < 10) { min = "0" + min; }
+		if(sec < 10) { sec = "0" + sec; }
+		console.log(hour + ':' + min + ':' + sec); 
+		return;
+	}
+	//ポーズ中の時間カウントを増やす
+	if(pause){
+		pauseDuration++
+		//console.log("pause", pauseDuration/framesPerSecond);
+		return;
+	}
+	//プライ中の時間カウントを増やす
+	playDuration++;
+	//console.log("play", playDuration/framesPerSecond);
+}
+ 
+
+//カーソルの位置取得関数
+function calculateMousePos(evt) {
+	//gets the information of the canvas bounding
+	var rect = canvas.getBoundingClientRect();
+	//gets the information of the html document
+	var root = document.documentElement;
+	//to get the cursor position correct
+	var mouseX = evt.clientX - rect.left - root.scrollLeft;
+	var mouseY = evt.clientY - rect.top - root.scrollTop;
+	return {
+		x: mouseX,
+		y: mouseY
+	};
+}
+
+//画面をクリックした時の挙動。普段は何も怒らない。
+function handleMouseClick(evt) {
+	//reset all values
+	if(showWinScreen) {
+		playerScore = 0;
+		computerScore = 0;
+		playDuration = 0;
+		pauseDuration = 0;
+		itemTime = 5;
+		itemX = canvas.width/2;
+		itemY = 300;
+
+		//let the game begin again
+		showWinScreen = false;
+
+		//BGMはじめから再スタート
+		stopBGM();
+		playBGM("Hey_So_Jungle.mp3");
+	}
+	if(pause){
+		//BGMを止めたところからスタート
+		resumeBGM();
+		//ポーズ画面から出る
+		pause = false;
+		return;
+	}
+}
+
+//Code will only run after the page has been fully loaded
+window.onload = function() {
+	canvas = document.getElementById('gameCanvas'); //connect canvas to js
+	canvasContext = canvas.getContext('2d');
+
+	//firstの処理を行わせるために最初に呼ぶ
+	drawEverything();
+
+	//Clickされるとゲームが始まる。
+	canvas.addEventListener('click',
+		function(){
+			//ゲームが始まってからタイマーを始めたいのでこんな風にしてる
+			if(!gameStarted){
+				gameStarted = true;
+				//タイマー開始。勝敗時に時間をプリントする
+				disp();
+				//音楽開始！
+				playBGM("Hey_So_Jungle.mp3");
+				playSound("ロボスタート.mp3");
+
+				//ずっと行われている処理
+				setInterval(function() {
+						moveEverything();
+						drawEverything();
+				    	disp();
+				    	//キーを押した時の挙動
+						window.document.onkeydown = function(evt){
+							//スペースバー
+						    if (evt.key === ' '){ 
+						    	//勝った後にはポーズできないようにする
+						    	if(!showWinScreen){
+						    		stopBGM();	
+						    		pause = true;
+						    	}
+							}
+							//sキー
+						    if (evt.key === 's'){
+						    	if(gotItem){
+						    		console.log("s down");
+						    			ballSpeedX += 10;
+						    			PADDLE_HEIGHT += 10;
+						    		
+						    	}
+						    }	
+						}
+						//キーを押してから離した時の挙動
+						window.document.onkeyup = function(evt){
+							//スペースバー
+						    if (evt.key === 's'){ 
+   						    	if(gotItem){
+   						    		console.log("s up");
+					    			ballSpeedX = 10;
+						    	}
+							}
+
+						}
+
+				}, 1000/framesPerSecond); //1000/framesPerSecondミリ秒毎に実行
+
+				//detect mouse movement, adjust the paddle position accordingly
+				canvas.addEventListener('mousemove', 
+					function(evt) {
+						var mousePos = calculateMousePos(evt)
+						playerPaddleY = mousePos.y - (PADDLE_HEIGHT/2);
+					}); 
+
+				//クリックされたらhandleMouseClickを呼び出す
+				canvas.addEventListener('mousedown', handleMouseClick);	
+
+			}
+		});
+}
+
+//ゴールした際の処理
+function ballReset() {
+	//position
+	ballX = canvas.width/2;
+	ballY = canvas.height/2;
+	//direction
+	ballSpeedX = -ballSpeedX;
+	ballSpeedY = ballSpeedY*Math.random();
+
+	sleep(200);
+
+	if(	playerScore >= WINNING_SCORE ||
+		computerScore >= WINNING_SCORE) {
+			showWinScreen = true;
+	}
+}
+
+
+//CPUの動き管理。ボールとの高さの差によって動くかを決める。
+function computerMovement() {
+	let computerPaddleCenter = computerPaddleY + (PADDLE_HEIGHT/2)
+		if(computerPaddleCenter < ballY - 35) {
+			computerPaddleY += 6;
+		} else if (computerPaddleCenter > ballY + 35){
+			computerPaddleY -= 6;
+		}
+
+}
+
+
+//itemの動き管理。
+function itemMovement() {
+	if((playDuration/framesPerSecond)>= itemTime && 
+		playDuration/framesPerSecond != 0){
+
+		itemX = itemX+itemSpeedX;
+		//itemY = itemY+itemSpeedY;
+
+		//switch mechanism player side
+		if(itemX < PADDLE_WIDTH) {
+			if(itemY > playerPaddleY && itemY < playerPaddleY + PADDLE_HEIGHT) {
+				gotItem = true;
+				playSound("ポップなIN.mp3");
+			}
+			//次のアイテムが出る時間を決定する
+			itemTime = playDuration/framesPerSecond + 5 + Math.random()*5;
+			console.log("itemTime is", itemTime); //next item appearance time
+
+			//アイテムが出てくる初期位置を設定.xは固定でyが変わる
+			itemX = canvas.width/2;
+			itemY = canvas.width * Math.random();
+
+		}
+
+	}
+
+}
+
+//move the objects by changing position and speed.
+function moveEverything() {
+	//勝ってたら何も動かさなくていいのですぐリターン
+	if(showWinScreen == true) {
+		return;
+	}
+	//ポーズしてても何も動かさないのですぐリターン
+	if(pause){
+		return;
+	}
+
+	//CPUとアイテムを動かすやつ
+	computerMovement();
+	itemMovement();
+
+
+	//for x-direction
+	ballX = ballX + ballSpeedX;
+
+	//switch mechanism player side
+	if(ballX < 0) {
+		if(ballY > playerPaddleY && ballY < playerPaddleY + PADDLE_HEIGHT) {
+			ballSpeedX = -ballSpeedX
+			let deltaY = ballY - (playerPaddleY + PADDLE_HEIGHT/2);
+			ballSpeedY = deltaY * 0.35;
+			playSound("ポップなIN.mp3");
+
+		} else {
+		computerScore ++;
+		//stopBGM();
+		playSound("失敗、ゲームオーバー.mp3");
+		if(computerScore >= WINNING_SCORE){
+			playSound("ロボゲームオーバー.mp3");
+		}
+		//recordTime();
+		ballReset();
+		}
+	}
+
+	//switch mechanism computer side
+	if(ballX > canvas.width) {
+		if(ballY > computerPaddleY && ballY < computerPaddleY + computerPaddleHeight) {
+			ballSpeedX = -ballSpeedX
+			let deltaY = ballY - (computerPaddleY + computerPaddleHeight/2);
+			ballSpeedY = deltaY * 0.35;
+			playSound("ポップなIN.mp3");
+		} else {
+		playerScore ++;
+		playSound("8bit_Hit.mp3");
+		playSound("ロボユーウィン.mp3");
+		ballReset();
+		}
+	}
+
+	//上下でバウンスするような処理
+	ballY = ballY + ballSpeedY;	
+	if(ballY > canvas.height || ballY <0) {
+	//switch when ball is out of stage
+	ballSpeedY = -ballSpeedY 
+	}
+}
+
+//真ん中にネットを描く
+function drawNet() {
+	for(var i=0; i<canvas.height; i += 40) {
+		colorRect(canvas.width/2 - 1, i, 2, 20, 'white')
+	}
+}
+
+//draw the objects 
+function drawEverything() {
+	//勝った時の描画処理
+	if(showWinScreen) {
+		if(	playerScore >= WINNING_SCORE) {
+			canvasContext.fillText("Player Won!", 100, 200);
+		} else if(computerScore >= WINNING_SCORE) {
+			canvasContext.fillText("Computer Won!", 600, 200);
+		}
+		canvasContext.fillStyle = "white"
+		canvasContext.fillText("Click to Continue", 150, 400);
+		return;
+	}
+	//ポーズ中の描画処理
+	if(pause){
+		//background 
+		colorRect(
+			0,					// x
+			0, 					// y
+			canvas.width, 		// width
+			canvas.height, 		// height
+			'grey'				// color
+		);
+		drawNet();		
+		canvasContext.fillStyle = "white"
+		canvasContext.fillText("Click to Resume", 150, 200);
+		return;
+	}
+
+	/*普段の描画*/
+
+	//background 
+	colorRect(
+		0,					// x
+		0, 					// y
+		canvas.width, 		// width
+		canvas.height, 		// height
+		'black'				// color
+		);
+	//player paddle
+	colorRect(
+		0, 
+		playerPaddleY, 
+		PADDLE_WIDTH, 
+		PADDLE_HEIGHT, 
+		'white'
+		);
+	//computer paddle
+	colorRect(
+		canvas.width - PADDLE_WIDTH, 
+		computerPaddleY, 
+		PADDLE_WIDTH, 
+		computerPaddleHeight, 
+		'yellow'
+		);
+	//ball
+	colorCircle(
+		ballX, 
+		ballY, 
+		10, 
+		'white'
+		);
+
+	//player score 
+	canvasContext.fillText(playerScore, 100, 100);
+	//computer score
+	canvasContext.fillText(computerScore, canvas.width - 100, 100)
+
+
+	//アイテムが出てくる描画処理
+	if((playDuration/framesPerSecond)>= itemTime && 
+		playDuration/framesPerSecond != 0){
+		//draw item
+		colorCircle(
+			itemX, 
+			itemY, 
+			10, 
+			'red'
+			);
+	}
+
+	//一番最初のスタート画面の描画（クリックしたらスタートのところ）
+	if(first){
+		canvasContext.fillText("Click to Start the Game", 338, 300);
+		canvasContext.fillText("Player", 100, 300);
+		canvasContext.fillText("Computer", 640, 300);
+		first = false;
+		return;
+	}
+
+	//真ん中のネットw
+	drawNet();
+}
+
+//Make a colored rectangle. Used for drawEverything function.
+function colorRect(leftX, topY, width, height, drawColor) {
+	canvasContext.fillStyle = drawColor;
+	canvasContext.fillRect(leftX, topY, width, height);
+}
+
+//Make a colored circle. Used for drawEverything function.
+function colorCircle(centerX, centerY, radius, drawColor) {
+	canvasContext.fillStyle = drawColor;
+	canvasContext.beginPath();
+	canvasContext.arc(centerX, centerY, radius, 0, Math.PI*2, true);
+	canvasContext.fill();
+}
+
+
+//音楽系は全部ここに
+function playBGM(song) {
+  bgm = new Audio();
+  bgm.src = song;
+  bgm.play();
+}
+
+function resumeBGM(){
+  bgm.play();
+}
+
+function stopBGM(song){
+  bgm.pause();
+}
+
+
+function playSound(sound) {
+  let audioElem = new Audio();
+  audioElem.src = sound;
+  audioElem.play();
+}
+
+//ゴールした際に一時的に止めるために
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+/*
+
+//for firebase
+var db = firebase.database();
+var ranking = db.ref("/finishedTime");
+//DB内容が変更されたとき実行される
+ranking.on("value", function(snapshot) {
+document.getElementById("textMessage").innerText = snapshot.val().message;
+});
+
+//入力内容を更新した時
+var recordTime = function(){
+    var message = document.getElementById("message").value;
+    ranking.set({message:message});
+}
+
+window.onload = function() {
+	document.getElementById("btnChangeData").onclick = recordTime;     
+};   
+
+function writeUserData(userId, name, email, imageUrl) {
+  firebase.database().ref('users/' + userId).set({
+    username: name,
+    email: email,
+    profile_picture : imageUrl
+  });
+}
+
+*/
+
+</script>
+
+<!-- 
+<body>
+	<p>Realtime Database</p>
+    <ul>
+    	<li id="textMessage"></li>
+        <li><input type="text" name="" id="message"></li>
+        <li><input type="button" value="Update" id="btnChangeData"></li>
+    </ul>
+</body>   
+
+<script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-app.js"></script>
+
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyD9AihwwFSzsW-B0KNewzkLGPPxt_e5EX0",
+    authDomain: "tennis-95105.firebaseapp.com",
+    databaseURL: "https://tennis-95105.firebaseio.com",
+    projectId: "tennis-95105",
+    storageBucket: "",
+    messagingSenderId: "338578934680",
+    appId: "1:338578934680:web:6b724ac2a1b45b7c"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+-->
+
 </html>
