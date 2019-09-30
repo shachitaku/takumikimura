@@ -113,7 +113,7 @@ function calculateMousePos(evt) {
 
 //画面をクリックした時の挙動。普段は何も怒らない。
 function handleMouseClick(evt) {
-	//reset all values
+	//もし勝敗が決まってたら
 	if(showWinScreen) {
 		playerScore = 0;
 		computerScore = 0;
@@ -123,13 +123,14 @@ function handleMouseClick(evt) {
 		itemX = canvas.width/2;
 		itemY = 300;
 
-		//let the game begin again
+		//ゲーム再開にするための変数
 		showWinScreen = false;
 
 		//BGMはじめから再スタート
 		stopBGM();
 		playBGM("Hey_So_Jungle.mp3");
 	}
+	//もしポーズ画面だったら
 	if(pause){
 		//BGMを止めたところからスタート
 		resumeBGM();
@@ -139,12 +140,13 @@ function handleMouseClick(evt) {
 	}
 }
 
-//Code will only run after the page has been fully loaded
+//ページが全部読み込んだ後の挙動
 window.onload = function() {
-	canvas = document.getElementById('gameCanvas'); //connect canvas to js
+	//CanvasをJSに繋げる
+	canvas = document.getElementById('gameCanvas');
 	canvasContext = canvas.getContext('2d');
 
-	//firstの処理を行わせるために最初に呼ぶ
+	//drawEverything内のfirstという処理を行う
 	drawEverything();
 
 	//Clickされるとゲームが始まる。
@@ -166,7 +168,7 @@ window.onload = function() {
 				    	disp();
 				    	//キーを押した時の挙動
 						window.document.onkeydown = function(evt){
-							//スペースバー
+							//スペースバー押したとき
 						    if (evt.key === ' '){ 
 						    	//勝った後にはポーズできないようにする
 						    	if(!showWinScreen){
@@ -174,19 +176,18 @@ window.onload = function() {
 						    		pause = true;
 						    	}
 							}
-							//sキー
+							//Sキー押したとき
 						    if (evt.key === 's'){
 						    	if(gotItem){
 						    		console.log("s down");
-						    			ballSpeedX += 10;
-						    			PADDLE_HEIGHT += 10;
-						    		
+									ballSpeedX += 10;
+									PADDLE_HEIGHT += 10;
 						    	}
 						    }	
 						}
 						//キーを押してから離した時の挙動
 						window.document.onkeyup = function(evt){
-							//スペースバー
+							//Sキーを押したとき
 						    if (evt.key === 's'){ 
    						    	if(gotItem){
    						    		console.log("s up");
@@ -198,8 +199,9 @@ window.onload = function() {
 
 				}, 1000/framesPerSecond); //1000/framesPerSecondミリ秒毎に実行
 
-				//detect mouse movement, adjust the paddle position accordingly
+				//カーソルの動きを読み取る
 				canvas.addEventListener('mousemove', 
+					//カーソルの動きに合わせてプレイヤーパドルの位置を変える
 					function(evt) {
 						var mousePos = calculateMousePos(evt)
 						playerPaddleY = mousePos.y - (PADDLE_HEIGHT/2);
@@ -214,15 +216,17 @@ window.onload = function() {
 
 //ゴールした際の処理
 function ballReset() {
-	//position
+	//リセット位置
 	ballX = canvas.width/2;
 	ballY = canvas.height/2;
-	//direction
+	//リセット侵攻方向
 	ballSpeedX = -ballSpeedX;
-	ballSpeedY = ballSpeedY*Math.random();
+	ballSpeedY = ballSpeedY*Math.random(); //y方向はランダムに
 
+	//一瞬だけボールを止める（ボールがゴールに入ったかどうか見れるように）
 	sleep(200);
 
+	//もしも規定スコアを達成していたら勝利スクリーンへ
 	if(	playerScore >= WINNING_SCORE ||
 		computerScore >= WINNING_SCORE) {
 			showWinScreen = true;
@@ -242,15 +246,16 @@ function computerMovement() {
 }
 
 
-//itemの動き管理。
+//itemの動き処理
 function itemMovement() {
+	//if文でアイテムがでる時間を調整する
 	if((playDuration/framesPerSecond)>= itemTime && 
 		playDuration/framesPerSecond != 0){
 
 		itemX = itemX+itemSpeedX;
 		//itemY = itemY+itemSpeedY;
 
-		//switch mechanism player side
+		//アイテムの当たり判定を定義
 		if(itemX < PADDLE_WIDTH) {
 			if(itemY > playerPaddleY && itemY < playerPaddleY + PADDLE_HEIGHT) {
 				gotItem = true;
@@ -285,11 +290,10 @@ function moveEverything() {
 	computerMovement();
 	itemMovement();
 
-
-	//for x-direction
+	//ボールのx方向管理
 	ballX = ballX + ballSpeedX;
 
-	//switch mechanism player side
+	//プレイヤー側のボール当たり判定
 	if(ballX < 0) {
 		if(ballY > playerPaddleY && ballY < playerPaddleY + PADDLE_HEIGHT) {
 			ballSpeedX = -ballSpeedX
@@ -309,7 +313,7 @@ function moveEverything() {
 		}
 	}
 
-	//switch mechanism computer side
+	//コンピューター側のボール当たり判定
 	if(ballX > canvas.width) {
 		if(ballY > computerPaddleY && ballY < computerPaddleY + computerPaddleHeight) {
 			ballSpeedX = -ballSpeedX
@@ -324,22 +328,22 @@ function moveEverything() {
 		}
 	}
 
-	//上下でバウンスするような処理
+	//ボールが画面上下の端でバウンスする処理
 	ballY = ballY + ballSpeedY;	
 	if(ballY > canvas.height || ballY <0) {
-	//switch when ball is out of stage
-	ballSpeedY = -ballSpeedY 
+		//ボールが画面左右の端でバウンスする処理
+		ballSpeedY = -ballSpeedY 
 	}
 }
 
-//真ん中にネットを描く
+//真ん中のネット描画用
 function drawNet() {
 	for(var i=0; i<canvas.height; i += 40) {
 		colorRect(canvas.width/2 - 1, i, 2, 20, 'white')
 	}
 }
 
-//draw the objects 
+//動く系のもの全ての描画
 function drawEverything() {
 	//勝った時の描画処理
 	if(showWinScreen) {
@@ -354,7 +358,6 @@ function drawEverything() {
 	}
 	//ポーズ中の描画処理
 	if(pause){
-		//background 
 		colorRect(
 			0,					// x
 			0, 					// y
@@ -368,9 +371,8 @@ function drawEverything() {
 		return;
 	}
 
-	/*普段の描画*/
-
-	//background 
+	//普段の描画
+	//背景
 	colorRect(
 		0,					// x
 		0, 					// y
@@ -378,7 +380,7 @@ function drawEverything() {
 		canvas.height, 		// height
 		'black'				// color
 		);
-	//player paddle
+	//プレイヤのパドル
 	colorRect(
 		0, 
 		playerPaddleY, 
@@ -386,7 +388,7 @@ function drawEverything() {
 		PADDLE_HEIGHT, 
 		'white'
 		);
-	//computer paddle
+	//コンピュータのパドル
 	colorRect(
 		canvas.width - PADDLE_WIDTH, 
 		computerPaddleY, 
@@ -394,7 +396,7 @@ function drawEverything() {
 		computerPaddleHeight, 
 		'yellow'
 		);
-	//ball
+	//ボール
 	colorCircle(
 		ballX, 
 		ballY, 
@@ -402,16 +404,9 @@ function drawEverything() {
 		'white'
 		);
 
-	//player score 
-	canvasContext.fillText(playerScore, 100, 100);
-	//computer score
-	canvasContext.fillText(computerScore, canvas.width - 100, 100)
-
-
-	//アイテムが出てくる描画処理
+	//アイテム
 	if((playDuration/framesPerSecond)>= itemTime && 
 		playDuration/framesPerSecond != 0){
-		//draw item
 		colorCircle(
 			itemX, 
 			itemY, 
@@ -420,7 +415,12 @@ function drawEverything() {
 			);
 	}
 
-	//一番最初のスタート画面の描画（クリックしたらスタートのところ）
+	//プレイヤのスコア
+	canvasContext.fillText(playerScore, 100, 100);
+	//コンピュータのスコア
+	canvasContext.fillText(computerScore, canvas.width - 100, 100)
+
+	//一番最初ゲーム開始前の描画（クリックしたらスタートのところ）
 	if(first){
 		canvasContext.fillText("Click to Start the Game", 338, 300);
 		canvasContext.fillText("Player", 100, 300);
@@ -429,17 +429,17 @@ function drawEverything() {
 		return;
 	}
 
-	//真ん中のネットw
+	//真ん中のネット
 	drawNet();
 }
 
-//Make a colored rectangle. Used for drawEverything function.
+//四角形の描画用関数
 function colorRect(leftX, topY, width, height, drawColor) {
 	canvasContext.fillStyle = drawColor;
 	canvasContext.fillRect(leftX, topY, width, height);
 }
 
-//Make a colored circle. Used for drawEverything function.
+//円の描画用関数
 function colorCircle(centerX, centerY, radius, drawColor) {
 	canvasContext.fillStyle = drawColor;
 	canvasContext.beginPath();
@@ -447,30 +447,33 @@ function colorCircle(centerX, centerY, radius, drawColor) {
 	canvasContext.fill();
 }
 
+//音楽系は全部ここに（正直機能が重複してるけど今はまだ気にしない）
 
-//音楽系は全部ここに
+//BGM流す用
 function playBGM(song) {
   bgm = new Audio();
   bgm.src = "./mp3/"+song;
   bgm.play();
 }
 
+//ポーズ後など、前流してたから流す用
 function resumeBGM(){
   bgm.play();
 }
 
+//BGM止める用
 function stopBGM(song){
   bgm.pause();
 }
 
-
+//SE流す用
 function playSound(sound) {
   let audioElem = new Audio();
   audioElem.src = "./mp3/"+sound;
   audioElem.play();
 }
 
-//ゴールした際に一時的に止めるために
+//一時的に全ての処理を止める
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
