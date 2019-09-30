@@ -482,65 +482,6 @@ function sleep(milliseconds) {
     }
   }
 }
-/*
-
-//for firebase
-var db = firebase.database();
-var ranking = db.ref("/finishedTime");
-//DB内容が変更されたとき実行される
-ranking.on("value", function(snapshot) {
-document.getElementById("textMessage").innerText = snapshot.val().message;
-});
-
-//入力内容を更新した時
-var recordTime = function(){
-    var message = document.getElementById("message").value;
-    ranking.set({message:message});
-}
-
-window.onload = function() {
-	document.getElementById("btnChangeData").onclick = recordTime;     
-};   
-
-function writeUserData(userId, name, email, imageUrl) {
-  firebase.database().ref('users/' + userId).set({
-    username: name,
-    email: email,
-    profile_picture : imageUrl
-  });
-}
-
-*/
 
 </script>
-
-<!-- 
-<body>
-	<p>Realtime Database</p>
-    <ul>
-    	<li id="textMessage"></li>
-        <li><input type="text" name="" id="message"></li>
-        <li><input type="button" value="Update" id="btnChangeData"></li>
-    </ul>
-</body>   
-
-<script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-app.js"></script>
-
-
-<script>
-  // Your web app's Firebase configuration
-  var firebaseConfig = {
-    apiKey: "AIzaSyD9AihwwFSzsW-B0KNewzkLGPPxt_e5EX0",
-    authDomain: "tennis-95105.firebaseapp.com",
-    databaseURL: "https://tennis-95105.firebaseio.com",
-    projectId: "tennis-95105",
-    storageBucket: "",
-    messagingSenderId: "338578934680",
-    appId: "1:338578934680:web:6b724ac2a1b45b7c"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-</script>
--->
-
 </html>
