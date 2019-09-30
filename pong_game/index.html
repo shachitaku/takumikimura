@@ -1,34 +1,24 @@
 <html>
 <h1 style="text-align: left;">Press space to pause.</h1>
-
-<!-- 
-hi <b> This text is thick </b> and <i> this text is slanted </i> and this text is normal
-from here below, it's javascript! no more html.
--->
-
-
-
-<!-- creating canvas to use js to display graphics  -->
+<!-- Canvas使ってJSで描画処理するために -->
 <canvas id = "gameCanvas" width = "800" height = "600"></canvas>
 
 <script>
-//make ball faster, slower only when pressing S.
+let canvas; 				//ゲーム画面を表示するサイズを定義
+let canvasContext;  		//グラフィック関連（四角形とか円とか）
 
-let canvas; 				//information on dimensions of display area
-let canvasContext;  		//graphical info. (cricles, rectangles)
+let ballX = 50;				//ボールx座標
+let ballY = 50;				//ボールy座標
+let ballSpeedX = 10;		//ボールx速度
+let ballSpeedY = 10;		//ボールy速度
 
-let ballX = 50;				//x-coordinate of ball
-let ballY = 50;				//y-coordinate of ball
-let ballSpeedX = 10;		//speed of ball in x direction
-let ballSpeedY = 10;		//speed of ball in y direction
-
-let playerPaddleY = 250; 	//y-coordinate of player paddle
-let computerPaddleY = 250; 	//y-coordinate of computer paddle
-let PADDLE_HEIGHT = 100; 	//height of the paddles
-const PADDLE_WIDTH = 10; 	//width of the paddles
+let playerPaddleY = 250; 	//プレイヤパドルy座標
+let computerPaddleY = 250; 	//コンピュータパドルy座標
+let PADDLE_HEIGHT = 100; 	//パドルの長さ
+const PADDLE_WIDTH = 10; 	//パドルの暑さ
 let computerPaddleHeight = 100;
 
-let itemX = 400;			//for items
+let itemX = 400;			//アイテム関連
 let itemY = 300;
 let itemSpeedX = -3;
 let itemSpeedY = -3;
@@ -36,13 +26,13 @@ let itemTime = 5;
 let itemExists = false;
 let gotItem = true;
 
-let playerScore = 0;		//initial score
-let computerScore = 0;		//initial score
-const WINNING_SCORE = 3;	//score needed to win
-let showWinScreen = false;	//for detection of win
+let playerScore = 0;		//プレイヤ最初のスコア
+let computerScore = 0;		//コンピュータ最初のスコア
+const WINNING_SCORE = 3;	//勝利点数
+let showWinScreen = false;	//勝利判定
 
-let first = true;			//just for first time executions
-let gameStarted = false;	//to enable game pause in the beginning
+let first = true;			//最初の時専用の処理判定（For noobs)
+let gameStarted = false;	//ページロードした瞬間からゲーム始まらないように
 let pause = false;			//ポーズ判定
 
 var start;					//時間計測用
